@@ -1,4 +1,4 @@
-const knn = require('./knn');
+const knn = require("./knn");
 
 describe("k Nearest Neighbor Algorithm", () => {
   const outputs = [
@@ -13,14 +13,14 @@ describe("k Nearest Neighbor Algorithm", () => {
     [101, 0.5, 16, 1],
     [201, 0.5, 16, 3],
     [351, 0.5, 16, 4],
-    [601, 0.5, 16, 5],
+    [601, 0.5, 16, 5]
   ];
 
-  it('a', () => {
-      expect(knn(outputs, 300, 3)).toBe(4);
+  it("a", () => {
+    expect(knn(outputs, 300, 3)).toBe(4);
   });
 
-  it('b', () => {
+  it("b", () => {
     expect(knn(outputs, 0, 5)).toBe(1);
-  })
+  });
 });

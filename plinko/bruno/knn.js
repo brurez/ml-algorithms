@@ -1,3 +1,5 @@
+const { utils } = require('./utils');
+
 const distance = (point1, point2) => {
   return Math.abs(point1 - point2);
 };
