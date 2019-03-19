@@ -1,5 +1,6 @@
 require("@tensorflow/tfjs-node");
 const tf = require("@tensorflow/tfjs");
+const plot = require("node-remote-plot");
 const loadCSV = require("./load-csv");
 // const LinearRegression = require("./LinearRegression");
 const LinearRegressionTF = require("./LinearRegressionTF");
@@ -12,8 +13,8 @@ let { features, labels, testFeatures, testLabels } = loadCSV("./cars.csv", {
 });
 
 const regressionTF = new LinearRegressionTF(features, labels, {
-  learningRate: 1,
-  iterations: 100
+  learningRate: 0.1,
+  iterations: 20
 });
 
 regressionTF.features.print();
@@ -21,6 +22,12 @@ regressionTF.labels.print();
 
 regressionTF.train();
 const r2 = regressionTF.test(testFeatures, testLabels);
+
+plot({
+  x: regressionTF.mseHistory.reverse(),
+  xLabel: 'Iteration #',
+  yLabel: 'Mean squared error'
+});
 
 console.log("R2 is: ", r2);
 
