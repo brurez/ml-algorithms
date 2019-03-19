@@ -7,7 +7,7 @@ class LinearRegressionTF {
     this.mseHistory = [];
 
     this.options = Object.assign(
-      { learningRate: 0.1, iterations: 1000 },
+      { learningRate: 0.1, iterations: 1000, batchSize: 10 },
       options
     );
 
@@ -16,12 +16,12 @@ class LinearRegressionTF {
     this.weights = tf.zeros([wRows, 1]);
   }
 
-  gradientDescent() {
-    const mxPlusBs = this.features.matMul(this.weights);
-    const differences = mxPlusBs.sub(this.labels);
-    const n = this.features.shape[0];
+  gradientDescent(features, labels) {
+    const mxPlusBs = features.matMul(this.weights);
+    const differences = mxPlusBs.sub(labels);
+    const n = features.shape[0];
 
-    const slopes = this.features
+    const slopes = features
       .transpose()
       .matMul(differences)
       .div(n);
@@ -30,8 +30,23 @@ class LinearRegressionTF {
   }
 
   train() {
+    const { batchSize } = this.options;
+    const batchQuantity = Math.floor(this.features.shape[0] / batchSize);
+
     for (let i = 0; i < this.options.iterations; i++) {
-      this.gradientDescent();
+      for (let j = 0; j < batchQuantity; j++) {
+        const featSlice = this.features.slice(
+          [j * batchSize, 0],
+          [batchSize, -1]
+        );
+        const labelSlice = this.labels.slice(
+          [j * batchSize, 0],
+          [batchSize, -1]
+        );
+
+        this.gradientDescent(featSlice, labelSlice);
+      }
+
       this.recordMSE();
       this.updateLearningRate();
     }
@@ -93,7 +108,7 @@ class LinearRegressionTF {
   updateLearningRate() {
     if (this.mseHistory.length < 2) return;
     const [last, secondLast] = this.mseHistory;
-    if(last > secondLast) {
+    if (last > secondLast) {
       this.options.learningRate /= 2;
     } else {
       this.options.learningRate *= 1.05;
