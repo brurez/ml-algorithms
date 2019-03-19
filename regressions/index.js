@@ -18,19 +18,24 @@ const regressionTF = new LinearRegressionTF(features, labels, {
   batchSize: 3
 });
 
-regressionTF.features.print();
-regressionTF.labels.print();
+// regressionTF.features.print();
+// regressionTF.labels.print();
 
 regressionTF.train();
 const r2 = regressionTF.test(testFeatures, testLabels);
 
 plot({
   x: regressionTF.mseHistory.reverse(),
-  xLabel: 'Iteration #',
-  yLabel: 'Mean squared error'
+  xLabel: "Iteration #",
+  yLabel: "Mean squared error"
 });
 
 console.log("R2 is: ", r2);
+
+const prediction = regressionTF.predict([[120, 2, 380]]);
+
+console.log("Prediction: ");
+prediction.print();
 
 /*const regression = new LinearRegression(features, labels, {
   learningRate: 0.00002,
