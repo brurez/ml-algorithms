@@ -5,9 +5,10 @@ class LinearRegressionTF {
     this.features = this.processFeatures(features);
     this.labels = tf.tensor(labels);
     this.mseHistory = [];
+    this.weightHistory = [];
 
     this.options = Object.assign(
-      { learningRate: 0.1, iterations: 1000, batchSize: 10 },
+      { learningRate: 0.1, iterations: 100, batchSize: 10 },
       options
     );
 
@@ -27,6 +28,7 @@ class LinearRegressionTF {
       .div(n);
 
     this.weights = this.weights.sub(slopes.mul(this.options.learningRate));
+    this.weightHistory.push(Array.from(this.weights.dataSync()));
   }
 
   train() {

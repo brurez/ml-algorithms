@@ -14,8 +14,8 @@ let { features, labels, testFeatures, testLabels } = loadCSV("./cars.csv", {
 
 const regressionTF = new LinearRegressionTF(features, labels, {
   learningRate: 0.1,
-  iterations: 5,
-  batchSize: 3
+  iterations: 10,
+  batchSize: 40
 });
 
 // regressionTF.features.print();
@@ -25,7 +25,7 @@ regressionTF.train();
 const r2 = regressionTF.test(testFeatures, testLabels);
 
 plot({
-  x: regressionTF.mseHistory.reverse(),
+  x: regressionTF.weightHistory,
   xLabel: "Iteration #",
   yLabel: "Mean squared error"
 });
