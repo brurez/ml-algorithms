@@ -1,11 +1,11 @@
 require("@tensorflow/tfjs-node");
 const tf = require("@tensorflow/tfjs");
 const plot = require("node-remote-plot");
-const loadCSV = require("./load-csv");
+const loadCSV = require("../load-csv");
 // const LinearRegression = require("./LinearRegression");
 const LinearRegressionTF = require("./LinearRegressionTF");
 
-let { features, labels, testFeatures, testLabels } = loadCSV("./cars.csv", {
+let { features, labels, testFeatures, testLabels } = loadCSV("./data/cars.csv", {
   shuffle: true,
   splitTest: 50,
   dataColumns: ["horsepower", "weight", "displacement"],
@@ -27,7 +27,9 @@ const r2 = regressionTF.test(testFeatures, testLabels);
 plot({
   x: regressionTF.weightHistory,
   xLabel: "Iteration #",
-  yLabel: "Mean squared error"
+  yLabel: "Weights",
+  title: 'Linear regression weights through iterations',
+  name: 'linear-regression-weights'
 });
 
 console.log("R2 is: ", r2);
