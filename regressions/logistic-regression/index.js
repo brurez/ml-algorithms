@@ -1,5 +1,7 @@
 require("@tensorflow/tfjs-node");
 const tf = require("@tensorflow/tfjs-node");
+const plot = require("node-remote-plot");
+
 const loadCSV = require("../load-csv");
 const LogisticRegression = require("./LogisticRegression");
 
@@ -20,11 +22,28 @@ const { features, labels, testFeatures, testLabels } = loadCSV(
 
 const regression = new LogisticRegression(features, labels, {
   learningRate: 0.5,
-  iterations: 100,
-  batchSize: 50
+  iterations: 5,
+  batchSize: 50,
+  decisionBoundary: 0.5,
 });
 
 regression.train();
-regression.predict([
-  [88, 97, 1.065]
-]).print();
+
+console.log(regression.test(testFeatures, testLabels));
+
+plot({
+  x: regression.weightHistory,
+  xLabel: "Iteration #",
+  yLabel: "Weights",
+  title: 'Logistic regression weights through iterations',
+  name: 'logistic-regression-weights'
+});
+
+/*
+plot({
+  x: regression.costHistory.reverse(),
+  xLabel: "Iteration #",
+  yLabel: "Cost",
+  title: 'Logistic regression costs through iterations',
+  name: 'logistic-regression-cost'
+});*/

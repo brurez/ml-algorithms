@@ -4,11 +4,16 @@ class LogisticRegression {
   constructor(features, labels, options) {
     this.features = this.processFeatures(features);
     this.labels = tf.tensor(labels);
-    this.mseHistory = [];
+    this.costHistory = [];
     this.weightHistory = [];
 
     this.options = Object.assign(
-      { learningRate: 0.1, iterations: 100, batchSize: 10 },
+      {
+        learningRate: 0.1,
+        iterations: 100,
+        batchSize: 10,
+        decisionBoundary: 0.5
+      },
       options
     );
 
@@ -49,7 +54,7 @@ class LogisticRegression {
         this.gradientDescent(featSlice, labelSlice);
       }
 
-      this.recordMSE();
+      this.recordCost();
       this.updateLearningRate();
     }
   }
@@ -57,31 +62,22 @@ class LogisticRegression {
   predict(observations) {
     return this.processFeatures(observations)
       .matMul(this.weights)
-      .sigmoid();
+      .sigmoid()
+      .greater(this.options.decisionBoundary)
+      .cast("float32");
   }
 
   test(testFeatures, testLabels) {
-    testFeatures = this.processFeatures(testFeatures);
+    const predictions = this.predict(testFeatures);
     testLabels = tf.tensor(testLabels);
 
-    const predictions = testFeatures.matMul(this.weights);
-
-    const SSres = testLabels
-      .sub(predictions)
-      .pow(2)
+    const incorrect = predictions
+      .sub(testLabels)
+      .abs()
       .sum()
       .get();
 
-    const SStot = testLabels
-      .sub(testLabels.mean())
-      .pow(2)
-      .sum()
-      .get();
-
-    // Coeffiecient of Determination
-    const r2 = 1 - SSres / SStot;
-
-    return r2;
+    return (predictions.shape[0] - incorrect) / predictions.shape[0];
   }
 
   processFeatures(features) {
@@ -102,20 +98,34 @@ class LogisticRegression {
     return features.sub(this.mean).div(this.variance.pow(0.5));
   }
 
-  recordMSE() {
-    const mse = this.features
-      .matMul(this.weights)
-      .sub(this.labels)
-      .pow(2)
-      .sum()
+  recordCost() {
+    const guesses = this.features.matMul(this.weights).sigmoid();
+
+    const termOne = this.labels.transpose().matMul(guesses.log());
+
+    const termTwo = this.labels
+      .mul(-1)
+      .add(1)
+      .transpose()
+      .matMul(
+        guesses
+          .mul(-1)
+          .add(1)
+          .log()
+      );
+
+    const cost = termOne
+      .add(termTwo)
       .div(this.features.shape[0])
-      .get();
-    this.mseHistory.unshift(mse);
+      .mul(-1)
+      .get(0, 0);
+
+    this.costHistory.unshift(cost);
   }
 
   updateLearningRate() {
-    if (this.mseHistory.length < 2) return;
-    const [last, secondLast] = this.mseHistory;
+    if (this.costHistory.length < 2) return;
+    const [last, secondLast] = this.costHistory;
     if (last > secondLast) {
       this.options.learningRate /= 2;
     } else {
